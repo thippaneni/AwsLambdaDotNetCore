@@ -1,0 +1,39 @@
+﻿AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Sample SAM Template for AwsDotNetLambdaExample
+
+Globals:
+    Function:
+        Timeout: 10
+
+Resources:
+    DebuggingExampleFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: AwsDotNetLambdaExample
+            CodeUri: src/AwsDotNetLambdaExample/bin/Release/netcoreapp3.1/publish
+            Handler: AwsDotNetLambdaExample::AwsDotNetLambdaExample.Functions::Get
+            Runtime: dotnetcore3.1
+            Environment:
+                Variables:
+                    PARAM1: VALUE
+            Events:
+                DebuggingExample:
+                    Type: Api
+                    Properties:
+                        Path: /
+                        Method: get
+
+Outputs:
+
+    DebuggingExampleApi:
+      Description: "API Gateway endpoint URL for Prod stage for AwsDotNetLambda Example function"
+      Value: "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/AwsDotNetLambdaExample/"
+
+    DebuggingExampleFunction:
+      Description: "AwsDotNetLambda Example Lambda Function ARN"
+      Value: AwsDotNetLambdaExampleFunction.Arn
+
+    DebuggingExampleFunctionIamRole:
+      Description: "Implicit IAM Role created for Debugging Example function"
+      Value: AwsDotNetLambdaExampleFunctionRole.Arn
