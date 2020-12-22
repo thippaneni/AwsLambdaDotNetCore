@@ -4,6 +4,8 @@ using System.Net;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.APIGatewayEvents;
 using Newtonsoft.Json;
+using System;
+using Amazon.XRay.Recorder.Core;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -29,11 +31,13 @@ namespace AwsDotNetLambdaExample
         /// <returns>The API Gateway response.</returns>
         public APIGatewayProxyResponse Get(APIGatewayProxyRequest request, ILambdaContext context)
         {
-            context.Logger.LogLine("Get Request\n");
+            LogMessageToCloudWatch(context, "Get Request recieved and processing");
+
             var statusCode = HttpStatusCode.InternalServerError;
             string body = string.Empty;
 
-            var currentUtcTime = processor.GetCurrentUTCTime();
+            var currentUtcTime = TraceFunction(processor.GetCurrentUTCTime, "GetCurrentUTCTime");
+            LogMessageToCloudWatch(context, "Processing request completed.");
 
             if (currentUtcTime != null)
             {
@@ -51,6 +55,21 @@ namespace AwsDotNetLambdaExample
                     { "Access-Control-Allow-Origin", "*" } 
                 }
             };           
+        }
+
+        private void LogMessageToCloudWatch(ILambdaContext context, string message)
+        {
+            var logMessage = string.Format("{0}:{1} - {2}", context.AwsRequestId, context.FunctionName, message);
+            context.Logger.LogLine(logMessage);
+        }
+
+        private T TraceFunction<T>(Func<T> func, string subSegmentName)
+        {
+            AWSXRayRecorder.Instance.BeginSubsegment(subSegmentName);
+            T result = func();
+            AWSXRayRecorder.Instance.EndSubsegment();
+
+            return result;
         }
     }
 }

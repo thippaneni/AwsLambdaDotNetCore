@@ -5,6 +5,7 @@ Description: Sample SAM Template for AwsDotNetLambdaExample
 Globals:
     Function:
         Timeout: 10
+        Tracing: Active
 
 Resources:
     AwsDotNetLambdaExampleFunction:
@@ -35,5 +36,5 @@ Outputs:
       Value: AwsDotNetLambdaExampleFunction.Arn
 
     AwsDotNetLambdaExampleFunctionIamRole:
-      Description: "Implicit IAM Role created for Debugging Example function"
+      Description: "Implicit IAM Role created for AwsDotNetLambda Example function"
       Value: AwsDotNetLambdaExampleFunctionRole.Arn
